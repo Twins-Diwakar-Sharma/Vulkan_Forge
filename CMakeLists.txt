@@ -105,10 +105,10 @@ elseif(UNIX)
     find_library(LIB_WAYLAND_CURSOR
       NAMES libwayland-cursor libwayland-cursor.so wayland-cursor 
       )
-    find_library(LIB_DL
-      NAMES libdl libdl.so 
-      )
-    set(LIBS ${LIBS} ${LIB_WAYLAND_CURSOR} ${LIB_DL})
+      #find_library(LIB_DL
+      #NAMES libdl libdl.so 
+      #)
+      set(LIBS ${LIBS} ${LIB_WAYLAND_CURSOR} ${CMAKE_DL_LIBS})
   elseif(${DISPLAY_SERVER} MATCHES "x11")
     find_package(x11 REQUIRED)
     set(LIBS ${LIBS} ${X11_LIBRARIES})

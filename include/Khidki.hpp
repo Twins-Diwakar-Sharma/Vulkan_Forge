@@ -21,6 +21,7 @@ class Khidki
     Khidki& operator=(const Khidki &) = delete;
 
     bool shouldClose();
+    GLFWwindow* getWindowPointer();
 };
 
 #endif

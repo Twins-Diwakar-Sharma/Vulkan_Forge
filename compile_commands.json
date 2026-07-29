@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/build",
+  "command": "/usr/bin/c++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/main.cpp.o -c /home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/main.cpp",
+  "file": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/main.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/main.cpp.o"
+},
+{
+  "directory": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/build",
+  "command": "/usr/bin/c++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Khidki.cpp.o -c /home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/Khidki.cpp",
+  "file": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/Khidki.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/Khidki.cpp.o"
+},
+{
+  "directory": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/build",
+  "command": "/usr/bin/c++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Engine.cpp.o -c /home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/Engine.cpp",
+  "file": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/Engine.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/Engine.cpp.o"
+}
+]

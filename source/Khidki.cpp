@@ -7,7 +7,8 @@ Khidki::Khidki(int w, int h, std::string name): width(w), height(h), windowName(
 
 Khidki::~Khidki()
 {
-  glfwDestroyWindow(window);
+  if(window)
+    glfwDestroyWindow(window);
   glfwTerminate();
 }
 
@@ -25,4 +26,9 @@ void Khidki::initWindow()
 bool Khidki::shouldClose()
 {
   return glfwWindowShouldClose(window);
+}
+
+GLFWwindow* Khidki::getWindowPointer()
+{
+  return window;
 }
