@@ -68,6 +68,8 @@ VkPhysicalDevice Engine::getPhysicalDevice()
   vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
   std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
   vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
+
+  std::cout << "Number of GPUs : " << physicalDevices.size() << std::endl;
   
   bool descreteSelected = false;
   VkPhysicalDevice physicalDevice = nullptr;
@@ -78,6 +80,8 @@ VkPhysicalDevice Engine::getPhysicalDevice()
     {
       VkPhysicalDeviceProperties props{};
       vkGetPhysicalDeviceProperties(pDev, &props);
+      std::cout << " -- device name -- " << props.deviceName << std::endl;
+      std::cout << " -- device type -- " << props.deviceType << std::endl;
       if(props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
       {
         physicalDevice = pDev;
@@ -99,20 +103,27 @@ Engine::Engine()
   if(!createVulkanInstance())
   {
     std::cerr << "UNABLE TO CREATE Vulkan INSTANCE" << std::endl;
-    initializationStatus = 404;
+    throw std::runtime_error("Failed");
+
   }
 
   if(glfwCreateWindowSurface(instance,khidki.getWindowPointer(),nullptr, &surface) != VK_SUCCESS)
   {
     std::cerr << "UNABLE TO CREATE Vulkan SURFACE" << std::endl;
-    initializationStatus = 404;
+    throw std::runtime_error("Failed");
+
   }
 
   if(physicalDevice = getPhysicalDevice(); !physicalDevice)
   {
     std::cerr << "UNABLE TO CREATE Vulkan Physical Device" << std::endl;
-    initializationStatus = 404;
+    throw std::runtime_error("Failed");
+
   }
+
+  // graphics queue
+
+  // logicalDevice
 }
 
 Engine::~Engine()
@@ -130,11 +141,6 @@ Engine::~Engine()
 
 void Engine::run()
 {
-  if(initializationStatus != 200)
-  {
-    std::cerr << "Stopped because initialization failed, error code " << initializationStatus << std::endl;
-    return;
-  }
   while (!khidki.shouldClose())
   {
     glfwPollEvents();

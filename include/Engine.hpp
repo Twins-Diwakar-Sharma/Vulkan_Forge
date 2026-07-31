@@ -16,7 +16,6 @@ class Engine
     VkInstance instance;
     VkSurfaceKHR surface;
     VkPhysicalDevice physicalDevice;
-    int initializationStatus=200;
 
     // Methods
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -28,6 +27,7 @@ class Engine
 
     bool createVulkanInstance();
     VkPhysicalDevice getPhysicalDevice();
+
 
 
   public:
