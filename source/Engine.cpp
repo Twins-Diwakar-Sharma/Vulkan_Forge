@@ -40,7 +40,7 @@ bool Engine::createVulkanInstance()
       .applicationVersion = VK_MAKE_VERSION(0,0,0),
       .pEngineName = "Cosmic_Forge",
       .engineVersion = VK_MAKE_VERSION(0, 0, 0),
-      .apiVersion = VK_API_VERSION_1_0
+      .apiVersion = vulkanApiVersion 
   };
 
   VkInstanceCreateInfo instCreateInfo
@@ -59,6 +59,7 @@ bool Engine::createVulkanInstance()
     return false;
   }
 
+  //volkLoadInstance(instance); 
   return true;
 }
 
@@ -94,29 +95,163 @@ VkPhysicalDevice Engine::getPhysicalDevice()
   return physicalDevice;
 }
 
+bool Engine::getGraphicsQueue()
+{
+  uint32_t queueFamilyCount = 0;
+  vkGetPhysicalDeviceQueueFamilyProperties2(physicalDevice, &queueFamilyCount, nullptr);
+  std::vector<VkQueueFamilyProperties2> queueFamilyProps(queueFamilyCount, 
+      {.sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2});
+  vkGetPhysicalDeviceQueueFamilyProperties2(physicalDevice, &queueFamilyCount, queueFamilyProps.data());
+  for(int currentFamilyIdx = 0; currentFamilyIdx < queueFamilyCount; currentFamilyIdx++)
+  {
+    VkBool32 hasPresentSupport = VK_FALSE;
+    vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, currentFamilyIdx, surface, &hasPresentSupport);
+    const auto &props = queueFamilyProps[currentFamilyIdx];
+    if( (props.queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT ) && ( hasPresentSupport) )
+    {
+      graphicsQueueFamilyIndex = currentFamilyIdx;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Engine::createLogicalDevice()
+{
+  VkPhysicalDeviceVulkan14Features supported14Features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES, .pNext = nullptr};
+  VkPhysicalDeviceVulkan13Features supported13Features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES, .pNext = &supported14Features};
+  VkPhysicalDeviceVulkan12Features supported12Features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES, .pNext = &supported13Features};
+
+  VkPhysicalDeviceFeatures2 supportedFeatures{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, .pNext = &supported12Features};
+  vkGetPhysicalDeviceFeatures2(physicalDevice, &supportedFeatures);
+
+  if(!supported13Features.dynamicRendering || !supported13Features.synchronization2 || !supported12Features.timelineSemaphore)
+  {
+    std::cerr << "Physical Device does not meet required features" << std::endl;
+    return false;
+  }
+
+  // Now produces seperate list for features you will use, edit it to add more later
+  // Directly using above instead, is a bad practice, it will enable everything and 
+  // add features which we donot need in this game
+  // NOTE: try to avoid NVIDIA or AMD specific features
+  VkPhysicalDeviceVulkan14Features featuresBeingUsed14
+  {
+    .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES, .pNext = nullptr
+  };
+
+  VkPhysicalDeviceVulkan13Features featuresBeingUsed13
+  {
+    .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+    .pNext = &featuresBeingUsed14,
+    .synchronization2 = VK_TRUE,
+    .dynamicRendering = VK_TRUE,
+  };
+
+  VkPhysicalDeviceVulkan12Features featuresBeingUsed12
+  {
+    .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+    .pNext = &featuresBeingUsed13,
+    .timelineSemaphore = VK_TRUE,
+  };
+
+  VkPhysicalDeviceFeatures2 usingFeatures{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, .pNext = &featuresBeingUsed12};
+
+  // setting queue priorities
+  std::vector<float> queuePriorities{1.0f};
+  VkDeviceQueueCreateInfo graphicsQueueInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+    .queueFamilyIndex = graphicsQueueFamilyIndex,
+    .queueCount = 1,
+    .pQueuePriorities = queuePriorities.data()
+  };
+
+  const std::vector<const char *> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
+  VkDeviceCreateInfo deviceCreateInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+    .pNext = &usingFeatures,
+    .queueCreateInfoCount = 1,
+    .pQueueCreateInfos = &graphicsQueueInfo,
+    .enabledExtensionCount = (uint32_t)(deviceExtensions.size()),
+    .ppEnabledExtensionNames = deviceExtensions.data(),
+    .pEnabledFeatures = nullptr
+  };
+
+  if(vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
+  {
+    return false;
+  }
+
+  vkGetDeviceQueue(logicalDevice, graphicsQueueFamilyIndex, 0, &graphicsQueue);
+  if(!graphicsQueue)
+  {
+    std::cerr << "UNABLE TO CREATE GRAPHICS QUEUE" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool Engine::initializeVMA()
+{
+
+  VmaVulkanFunctions vulkanFunctions = {};
+   
+  VmaAllocatorCreateInfo allocatorCreateInfo = {};
+  allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+  allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+  allocatorCreateInfo.physicalDevice = physicalDevice;
+  allocatorCreateInfo.device = logicalDevice;
+  allocatorCreateInfo.instance = instance;
+  allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
+   
+  if(vmaCreateAllocator(&allocatorCreateInfo, &vmaAllocator) != VK_SUCCESS)
+  {
+    return false;
+  }
+  return true;
+}
+
 Engine::Engine()
 { 
   if(!createVulkanInstance())
   {
-    std::cerr << "UNABLE TO CREATE Vulkan INSTANCE" << std::endl;
-    initializationStatus = 404;
+    throw std::runtime_error("unable to create Vulkan INSTANCE");
   }
 
   if(glfwCreateWindowSurface(instance,khidki.getWindowPointer(),nullptr, &surface) != VK_SUCCESS)
   {
-    std::cerr << "UNABLE TO CREATE Vulkan SURFACE" << std::endl;
-    initializationStatus = 404;
+    throw std::runtime_error("unable to create Vulkan SURFACE");
   }
 
   if(physicalDevice = getPhysicalDevice(); !physicalDevice)
   {
-    std::cerr << "UNABLE TO CREATE Vulkan Physical Device" << std::endl;
-    initializationStatus = 404;
+    throw std::runtime_error("unable to get Vulkan PHYSICAL DEVICE");
   }
+
+  if(!getGraphicsQueue())
+  {
+    throw std::runtime_error("unable to get Vulkan GRAPHICS QUEUE");
+  }
+
+  if(!createLogicalDevice())
+  {
+    throw std::runtime_error("unable to get Vulkan LOGICAL DEVICE");
+  }
+  
+  if(!initializeVMA())
+  {
+    throw std::runtime_error("unable to initialize Vulkan Memory allocator");
+  }
+  
 }
 
 Engine::~Engine()
 {
+  vmaDestroyAllocator(vmaAllocator);
   if(surface)
   {
     vkDestroySurfaceKHR(instance, surface, nullptr);
@@ -130,11 +265,6 @@ Engine::~Engine()
 
 void Engine::run()
 {
-  if(initializationStatus != 200)
-  {
-    std::cerr << "Stopped because initialization failed, error code " << initializationStatus << std::endl;
-    return;
-  }
   while (!khidki.shouldClose())
   {
     glfwPollEvents();

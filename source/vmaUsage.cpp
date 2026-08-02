@@ -1,0 +1,1 @@
+#define VMA_IMPLEMENTATION

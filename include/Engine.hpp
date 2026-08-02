@@ -1,22 +1,33 @@
 #ifndef H_3NGIN3_H
 #define H_3NGIN3_H
 
+//#define VMA_IMPLEMENTATION
+//#include "vma/vk_mem_alloc.h"
+
 #include <string>
 #include "Khidki.hpp"
 #include <vulkan/vulkan.hpp>
 #include <iostream>
 #include <stdexcept>
 
+#include "vma/vk_mem_alloc.h"
+
+
 class Engine
 {
   private:
     // Members
     const std::string appName = "VULKAN";
+    uint32_t vulkanApiVersion = VK_API_VERSION_1_4;
     Khidki khidki{WIDTH, HEIGHT, appName};
-    VkInstance instance;
-    VkSurfaceKHR surface;
-    VkPhysicalDevice physicalDevice;
-    int initializationStatus=200;
+
+    VkInstance instance = nullptr;
+    VkSurfaceKHR surface = nullptr;
+    VkPhysicalDevice physicalDevice = nullptr;
+    uint32_t graphicsQueueFamilyIndex = 0;
+    VkDevice logicalDevice = nullptr;
+    VkQueue graphicsQueue = nullptr;
+    VmaAllocator vmaAllocator = nullptr;
 
     // Methods
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -28,6 +39,9 @@ class Engine
 
     bool createVulkanInstance();
     VkPhysicalDevice getPhysicalDevice();
+    bool getGraphicsQueue();
+    bool createLogicalDevice();
+    bool initializeVMA();
 
 
   public:
@@ -39,7 +53,6 @@ class Engine
     void run();
     Engine();
     ~Engine();
-
 
 };
 

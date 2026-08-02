@@ -26,6 +26,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/source)
 set(
   SOURCES 
+  ${SOURCE_DIR}/vmaUsage.cpp
   ${SOURCE_DIR}/main.cpp
   ${SOURCE_DIR}/Khidki.cpp
   ${SOURCE_DIR}/Engine.cpp
@@ -34,6 +35,7 @@ set(
 set(INC_DIR ${CMAKE_SOURCE_DIR}/include)
 set(
   HEADER_FILES 
+  ${INC_DIR}/Engine.hpp
   ${INC_DIR}/Khidki.hpp
 )
 

@@ -2,3 +2,5 @@ build/
 build/**
 .ccls-cache/
 .ccls-cache/**
+.ccls
+compile_commands.json
