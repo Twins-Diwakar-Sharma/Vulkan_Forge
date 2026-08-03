@@ -44,6 +44,7 @@ class Engine
     bool initializeVMA();
 
 
+
   public:
     // Members
     static constexpr int WIDTH = 800;

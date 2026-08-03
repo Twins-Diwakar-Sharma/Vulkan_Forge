@@ -1,3 +1,4 @@
+#define VMA_IMPLEMENTATION 
 #include "Engine.hpp"
 
 bool Engine::createVulkanInstance()
@@ -69,6 +70,8 @@ VkPhysicalDevice Engine::getPhysicalDevice()
   vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
   std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
   vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
+
+  std::cout << "Number of GPUs : " << physicalDevices.size() << std::endl;
   
   bool descreteSelected = false;
   VkPhysicalDevice physicalDevice = nullptr;
@@ -79,6 +82,8 @@ VkPhysicalDevice Engine::getPhysicalDevice()
     {
       VkPhysicalDeviceProperties props{};
       vkGetPhysicalDeviceProperties(pDev, &props);
+      std::cout << " -- device name -- " << props.deviceName << std::endl;
+      std::cout << " -- device type -- " << props.deviceType << std::endl;
       if(props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
       {
         physicalDevice = pDev;
@@ -207,7 +212,7 @@ bool Engine::initializeVMA()
   allocatorCreateInfo.device = logicalDevice;
   allocatorCreateInfo.instance = instance;
   allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
-   
+  
   if(vmaCreateAllocator(&allocatorCreateInfo, &vmaAllocator) != VK_SUCCESS)
   {
     return false;
