@@ -1,4 +1,5 @@
 #define VMA_IMPLEMENTATION 
+
 #include "Engine.hpp"
 
 bool Engine::createVulkanInstance()
@@ -96,6 +97,7 @@ VkPhysicalDevice Engine::getPhysicalDevice()
     std::cout << "Selected DESCRETE GPU" << std::endl;
   else
     std::cout << "Selected INTEGRATED GPU" << std::endl;
+  
 
   return physicalDevice;
 }
@@ -220,6 +222,183 @@ bool Engine::initializeVMA()
   return true;
 }
 
+bool Engine::createSwapchain(uint32_t width, uint32_t height)
+{
+  swapchainWidth = width;
+  swapchainHeight = height;
+
+  VkSurfaceCapabilitiesKHR surfaceCaps{};
+  if(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCaps) != VK_SUCCESS)
+  {
+    std::cerr << "Couldn't get surface capabilities for swapchain" << std::endl;
+    return false;
+  }
+  
+  uint32_t requestedImageCount = std::max(numSwapchainImages, surfaceCaps.minImageCount);
+  if(surfaceCaps.maxImageCount > 0)
+  {
+    requestedImageCount = std::min(requestedImageCount, surfaceCaps.maxImageCount);
+  }
+
+  uint32_t formatCount = 0;
+  vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
+  std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
+  vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data());
+
+  bool formatSupported = false;
+  for (const VkSurfaceFormatKHR &surfFormat : surfaceFormats)
+  {
+    if(surfFormat.format == swapchainFormat)
+    {
+      formatSupported = true;
+      break;
+    }
+  }
+  
+  if(!formatSupported)
+  {
+    std::cerr << "Requested format for swapchain: " << swapchainFormat << " not supported ny surface " << std::endl;
+    return false;
+  }
+
+  VkSwapchainCreateInfoKHR swapchainCreateInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+    .surface = surface,
+    .minImageCount = requestedImageCount,
+    .imageFormat = swapchainFormat,
+    .imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR,
+    .imageExtent{.width = swapchainWidth, .height = swapchainHeight },
+    .imageArrayLayers = 1,
+    .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+    .preTransform = surfaceCaps.currentTransform,
+    .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+    .presentMode = VK_PRESENT_MODE_MAILBOX_KHR
+  };
+
+  if (vkCreateSwapchainKHR(logicalDevice, &swapchainCreateInfo, nullptr, &swapchain) != VK_SUCCESS)
+  {
+    std::cerr << "Error creating swapchain" << std::endl;
+    return false;
+  }
+
+  uint32_t imageCount = 0;
+  vkGetSwapchainImagesKHR(logicalDevice, swapchain, &imageCount, nullptr);
+  swapchainImages.resize(imageCount);
+  vkGetSwapchainImagesKHR(logicalDevice, swapchain, &imageCount, swapchainImages.data());
+  swapchainImageViews.resize(imageCount);
+
+  std::cout << "Swap chain images count " << imageCount << std::endl;
+
+  for(size_t i = 0; i < swapchainImages.size(); i++)
+  {
+    VkImageViewCreateInfo imgViewInfo
+    {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+      .image = swapchainImages[i],
+      .viewType = VK_IMAGE_VIEW_TYPE_2D,
+      .format = swapchainFormat,
+      .subresourceRange
+      {
+        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .baseMipLevel = 0,
+        .levelCount = 1,
+        .baseArrayLayer = 0,
+        .layerCount = 1
+      }
+    };
+
+    if(vkCreateImageView(logicalDevice, &imgViewInfo, nullptr, &swapchainImageViews[i]) != VK_SUCCESS)
+    {
+      std::cerr << " Error creating swap chain image views" << std::endl;
+      return false;
+    }
+  }
+  
+  renderCompleteSemaphores.resize(imageCount);
+  for(VkSemaphore &semaphore : renderCompleteSemaphores)
+  {
+    VkSemaphoreCreateInfo semaphoreInfo{.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+    if(vkCreateSemaphore(logicalDevice, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS)
+    {
+      std::cerr << "Error creating render-complete semaphores" << std::endl;
+      return false;
+    }
+  }
+  
+  VkImageCreateInfo depthCreateInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+    .imageType = VK_IMAGE_TYPE_2D,
+    .format = depthFormat,
+    .extent{.width = swapchainWidth, .height = swapchainHeight, .depth = 1 },
+    .mipLevels = 1,
+    .arrayLayers = 1,
+    .samples = VK_SAMPLE_COUNT_1_BIT,
+    .tiling = VK_IMAGE_TILING_OPTIMAL,
+    .usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+    .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
+  };
+
+  VmaAllocationCreateInfo allocInfo
+  {
+    .flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT,
+    .usage = VMA_MEMORY_USAGE_AUTO
+  };
+  if(vmaCreateImage(vmaAllocator, &depthCreateInfo, &allocInfo, &depthImage, &depthImageAllocation, nullptr) != VK_SUCCESS)
+  {
+    std::cerr << "VMA: Error allocating depth image" << std::endl;
+    return false;
+  }
+
+  VkImageViewCreateInfo depthImgViewInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+    .image = depthImage,
+    .viewType = VK_IMAGE_VIEW_TYPE_2D,
+    .format = depthFormat,
+    .subresourceRange{
+      .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT, 
+      .levelCount = 1, 
+      .layerCount = 1
+    },
+  };
+  if(vkCreateImageView(logicalDevice, &depthImgViewInfo, nullptr, &depthImageView) != VK_SUCCESS)
+  {
+    std::cerr << "Error creating depth image view" << std::endl;
+    return false;
+  }
+  return true;
+}
+
+void Engine::destroySwapchainResources()
+{
+  for(unsigned int i=0; i<swapchainImageViews.size(); i++)
+  {
+    vkDestroyImageView(logicalDevice, swapchainImageViews[i], nullptr);
+  }
+  swapchainImageViews.clear();
+
+  for(unsigned int i=0; i<renderCompleteSemaphores.size(); i++)
+  {
+    vkDestroySemaphore(logicalDevice, renderCompleteSemaphores[i], nullptr);
+  }
+  renderCompleteSemaphores.clear();
+
+  if(swapchain)
+  {
+    vkDestroySwapchainKHR(logicalDevice, swapchain, nullptr);
+    swapchain = nullptr;
+  }
+
+  if(depthImageView)
+  {
+    vkDestroyImageView(logicalDevice, depthImageView, nullptr);
+    vmaDestroyImage(vmaAllocator, depthImage, depthImageAllocation);
+    depthImageView = nullptr;
+  }
+}
+
 Engine::Engine()
 { 
   if(!createVulkanInstance())
@@ -251,11 +430,18 @@ Engine::Engine()
   {
     throw std::runtime_error("unable to initialize Vulkan Memory allocator");
   }
+
+  if(!createSwapchain(WIDTH, HEIGHT))
+  {
+    throw std::runtime_error("unable to create swapchain images");
+  }
   
 }
 
 Engine::~Engine()
 {
+  destroySwapchainResources();
+
   vmaDestroyAllocator(vmaAllocator);
   if(surface)
   {

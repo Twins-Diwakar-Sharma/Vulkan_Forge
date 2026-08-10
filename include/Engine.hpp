@@ -1,16 +1,13 @@
 #ifndef H_3NGIN3_H
 #define H_3NGIN3_H
 
-//#define VMA_IMPLEMENTATION
-//#include "vma/vk_mem_alloc.h"
-
 #include <string>
 #include "Khidki.hpp"
 #include <vulkan/vulkan.hpp>
 #include <iostream>
 #include <stdexcept>
 
-#include "vma/vk_mem_alloc.h"
+#include "vk_mem_alloc.h"
 
 
 class Engine
@@ -20,6 +17,9 @@ class Engine
     const std::string appName = "VULKAN";
     uint32_t vulkanApiVersion = VK_API_VERSION_1_4;
     Khidki khidki{WIDTH, HEIGHT, appName};
+    uint32_t swapchainWidth, swapchainHeight;
+    uint32_t numSwapchainImages = 2u;
+
 
     VkInstance instance = nullptr;
     VkSurfaceKHR surface = nullptr;
@@ -28,6 +28,17 @@ class Engine
     VkDevice logicalDevice = nullptr;
     VkQueue graphicsQueue = nullptr;
     VmaAllocator vmaAllocator = nullptr;
+    VkFormat swapchainFormat = VK_FORMAT_B8G8R8A8_SRGB;
+    VkSwapchainKHR swapchain = nullptr;
+    VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
+    VkImage depthImage = nullptr;
+    VkImageView depthImageView = nullptr;
+    VmaAllocation depthImageAllocation = nullptr;
+
+    std::vector<VkImage> swapchainImages;
+    std::vector<VkImageView> swapchainImageViews;
+    std::vector<VkSemaphore> renderCompleteSemaphores;
+    bool requireSwapchainRecreate = false;
 
     // Methods
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -42,7 +53,7 @@ class Engine
     bool getGraphicsQueue();
     bool createLogicalDevice();
     bool initializeVMA();
-
+    bool createSwapchain(uint32_t width, uint32_t height);
 
 
   public:
@@ -54,6 +65,8 @@ class Engine
     void run();
     Engine();
     ~Engine();
+
+    void destroySwapchainResources();
 
 };
 
