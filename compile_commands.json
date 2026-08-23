@@ -1,20 +1,26 @@
 [
 {
-  "directory": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/build",
-  "command": "/usr/bin/c++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/main.cpp.o -c /home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/main.cpp",
-  "file": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/main.cpp",
+  "directory": "/home/thanatos/programs/Vulkan_Forge/build",
+  "command": "/nix/store/788mx070y81zjlg5ipcl0cra3afviw9k-gcc-wrapper-15.2.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/thanatos/programs/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/main.cpp.o -c /home/thanatos/programs/Vulkan_Forge/source/main.cpp",
+  "file": "/home/thanatos/programs/Vulkan_Forge/source/main.cpp",
   "output": "CMakeFiles/VulkanTest.dir/source/main.cpp.o"
 },
 {
-  "directory": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/build",
-  "command": "/usr/bin/c++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Khidki.cpp.o -c /home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/Khidki.cpp",
-  "file": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/Khidki.cpp",
+  "directory": "/home/thanatos/programs/Vulkan_Forge/build",
+  "command": "/nix/store/788mx070y81zjlg5ipcl0cra3afviw9k-gcc-wrapper-15.2.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/thanatos/programs/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Khidki.cpp.o -c /home/thanatos/programs/Vulkan_Forge/source/Khidki.cpp",
+  "file": "/home/thanatos/programs/Vulkan_Forge/source/Khidki.cpp",
   "output": "CMakeFiles/VulkanTest.dir/source/Khidki.cpp.o"
 },
 {
-  "directory": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/build",
-  "command": "/usr/bin/c++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Engine.cpp.o -c /home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/Engine.cpp",
-  "file": "/home/kwisatz-haderach/Programming/Twins-Diwakar-Sharma/Vulkan_Forge/source/Engine.cpp",
+  "directory": "/home/thanatos/programs/Vulkan_Forge/build",
+  "command": "/nix/store/788mx070y81zjlg5ipcl0cra3afviw9k-gcc-wrapper-15.2.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/thanatos/programs/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Engine.cpp.o -c /home/thanatos/programs/Vulkan_Forge/source/Engine.cpp",
+  "file": "/home/thanatos/programs/Vulkan_Forge/source/Engine.cpp",
   "output": "CMakeFiles/VulkanTest.dir/source/Engine.cpp.o"
+},
+{
+  "directory": "/home/thanatos/programs/Vulkan_Forge/build",
+  "command": "/nix/store/788mx070y81zjlg5ipcl0cra3afviw9k-gcc-wrapper-15.2.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/thanatos/programs/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/VulkanContext.cpp.o -c /home/thanatos/programs/Vulkan_Forge/source/VulkanContext.cpp",
+  "file": "/home/thanatos/programs/Vulkan_Forge/source/VulkanContext.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/VulkanContext.cpp.o"
 }
 ]

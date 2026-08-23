@@ -1,6 +1,6 @@
 #include "Khidki.hpp"
 
-Khidki::Khidki(int w, int h, std::string name): width(w), height(h), windowName(name)
+Khidki::Khidki(uint32_t w, uint32_t h, std::string name): width(w), height(h), windowName(name)
 {
   initWindow();
 }

@@ -11,11 +11,11 @@ class Khidki
   private:
     GLFWwindow* window;
     void initWindow();
-    const int width;
-    const int height;
+    const uint32_t width;
+    const uint32_t height;
     std::string windowName;
   public:
-    Khidki(int w, int h, std::string name);
+    Khidki(uint32_t w, uint32_t h, std::string name);
     ~Khidki();
     Khidki(const Khidki &) = delete;
     Khidki& operator=(const Khidki &) = delete;

@@ -29,14 +29,18 @@ set(
   ${SOURCE_DIR}/main.cpp
   ${SOURCE_DIR}/Khidki.cpp
   ${SOURCE_DIR}/Engine.cpp
+  ${SOURCE_DIR}/VulkanContext.cpp
+  ${SOURCE_DIR}/Pipeline.cpp
 ) 
 
 set(INC_DIR ${CMAKE_SOURCE_DIR}/include)
 set(
   HEADER_FILES 
-  #${INC_DIR}/vk_mem_alloc.h
+  ${INC_DIR}/vk_mem_alloc.h
   ${INC_DIR}/Engine.hpp
   ${INC_DIR}/Khidki.hpp
+  ${INC_DIR}/VulkanContext.hpp
+  ${INC_DIR}/Pipeline.hpp
 )
 
 set(SHADERS_DIR ${CMAKE_SOURCE_DIR}/shaders)
