@@ -157,6 +157,7 @@ void Pipeline::createGraphicsPipeline(const std::string& vertFilePath, const std
     .stageCount = (uint32_t)shaderStages.size(),
     .pStages = shaderStages.data(),
     .pVertexInputState = &vertInputInfo,
+    .pInputAssemblyState = &inputAssemblyInfo,
     .pViewportState = &viewportInfo,
     .pRasterizationState = &rasterInfo,
     .pMultisampleState = &multiSampleInfo,
@@ -178,8 +179,8 @@ void Pipeline::createGraphicsPipeline(const std::string& vertFilePath, const std
 void Pipeline::makePipeline(std::string name)
 {
   this->name = name;
-  std::string vertFilePath = "shaders/" + name + "vert.spv";
-  std::string fragFilePath = "shaders/" + name + "frag.spv";
+  std::string vertFilePath = "shaders/" + name + ".vert.spv";
+  std::string fragFilePath = "shaders/" + name + ".frag.spv";
   createGraphicsPipeline(vertFilePath, fragFilePath);
 }
 
@@ -187,3 +188,8 @@ Pipeline::Pipeline()
 {}
 Pipeline::~Pipeline()
 {}
+
+void Pipeline::render()
+{
+
+}

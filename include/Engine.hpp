@@ -15,8 +15,16 @@ class Engine
     // Members
     const std::string appName = "VULKAN";
     Khidki khidki{WIDTH, HEIGHT, appName};
-    //VulkanContext vkContext{appName, khidki.getWindowPointer(), WIDTH, HEIGHT};
     Pipeline pipeline;
+
+    // Methods
+    void update();
+    void input();
+    void render();
+
+    uint64_t frameIndex = 0;
+    uint64_t nextSignalValue = vulkancontext_MaxFramesInFlight;
+    bool requireSwapchainRecreate = false;
   public:
     // Members
     static constexpr uint32_t WIDTH = 800;
@@ -26,8 +34,6 @@ class Engine
     void run();
     Engine();
     ~Engine();
-
-
 };
 
 #endif

@@ -16,8 +16,16 @@ class Pipeline
     std::string name;
   public:
     void makePipeline(std::string name);
+    // @ TODO: seperate name and shader specific info for
+    // creation and rendering into a new class PipelineConfig
+    // now pipeline will take config as input
+    // make a seperate file namespace containing all configs,
+    // use those objects as input for Pipeline
+    // now you dont have to create new class for new pipeline,
+    // instead create only new object for config in namespace, use that
     Pipeline();
     ~Pipeline();
+    void render();
 
   private:
     static std::vector<char> readFile(const std::string& filepath);

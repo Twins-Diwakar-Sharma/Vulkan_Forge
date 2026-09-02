@@ -9,6 +9,13 @@
 #include "vk_mem_alloc.h"
 #include <GLFW/glfw3.h>
 
+struct FrameResource
+{
+  VkCommandPool commandPool = nullptr;
+  VkCommandBuffer commandBuffer = nullptr;
+  VkSemaphore imageAcquiredSemaphore = nullptr;
+};
+
 namespace vulkancontext
 {
   extern uint32_t vulkanApiVersion;
@@ -32,7 +39,10 @@ namespace vulkancontext
   extern std::vector<VkImage> swapchainImages;
   extern std::vector<VkImageView> swapchainImageViews;
   extern std::vector<VkSemaphore> renderCompleteSemaphores;
-
+  
+  extern VkSemaphore timelineSemaphore;
+  #define vulkancontext_MaxFramesInFlight 2
+  extern FrameResource frameResources[vulkancontext_MaxFramesInFlight]; 
 
   // Methods public
   static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -42,6 +52,8 @@ namespace vulkancontext
       void* pUserData);
 
   void initialize(const std::string* appName, GLFWwindow* glfwWindowPointer, uint32_t width, uint32_t height);
+  bool createSwapchain(GLFWwindow* glfwWindowPointer);
+  void destroySwapchainResources();
   void destroy();
 
   // Methods private = unnamed nested namespace they are all in cpp not in header remember that, here is just a list
@@ -54,8 +66,8 @@ namespace vulkancontext
     bool findGraphicsQueue();
     bool createLogicalDevice();
     bool createVMA();
-    bool createSwapchain(uint32_t width, uint32_t height);
-    void destroySwapchainResources();
+    bool createOtherSemaphores();
+    bool createCommandBuffers();
   }
 */
 }
