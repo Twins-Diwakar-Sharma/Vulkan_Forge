@@ -20,6 +20,7 @@ void Engine::run()
     update();
     render();
   }
+  vkDeviceWaitIdle(vulkancontext::logicalDevice);
 }
 
 void Engine::update()
@@ -74,14 +75,55 @@ void Engine::render()
     .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
   };
   vkBeginCommandBuffer(res.commandBuffer, &cmdBeginInfo);
-  // render calls // pipeline.render()
+  // start render calls 
+  pipeline.render(res.commandBuffer, imageIndex);
+  // end render calls
   vkEndCommandBuffer(res.commandBuffer);
   
+  VkSemaphoreSubmitInfo imageAcquireWaitInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+    .semaphore = imageAcquiredSemaphore,
+    .stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT
+  };
+
+  std::vector<VkSemaphoreSubmitInfo> semaphoreSignals
+  {
+    {
+      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+      .semaphore = vulkancontext::renderCompleteSemaphores[imageIndex],
+      .stageMask = VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT
+    },
+      {
+      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+      .semaphore = vulkancontext::timelineSemaphore,
+      .value = signalValue,
+      .stageMask = VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT
+      }
+  };
+
+  VkCommandBufferSubmitInfo cmdSubmitInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+    .commandBuffer = res.commandBuffer,
+  };
+  VkSubmitInfo2 submitInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+    .waitSemaphoreInfoCount = 1,
+    .pWaitSemaphoreInfos = &imageAcquireWaitInfo,
+    .commandBufferInfoCount = 1,
+    .pCommandBufferInfos = &cmdSubmitInfo,
+    .signalSemaphoreInfoCount = (uint32_t)(semaphoreSignals.size()),
+    .pSignalSemaphoreInfos = semaphoreSignals.data()
+  };
+    
+  vkQueueSubmit2(vulkancontext::graphicsQueue,1, &submitInfo, VK_NULL_HANDLE);
   VkPresentInfoKHR presentInfo
   {
     .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-    .waitSemaphoreCount = 0, //1
-    .pWaitSemaphores = nullptr, // & renderCompleteSemaphores[imageIndex]
+    .waitSemaphoreCount = 1, 
+    .pWaitSemaphores = &vulkancontext::renderCompleteSemaphores[imageIndex], 
     .swapchainCount = 1,
     .pSwapchains = &vulkancontext::swapchain,
     .pImageIndices = &imageIndex,

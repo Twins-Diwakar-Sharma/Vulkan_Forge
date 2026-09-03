@@ -189,7 +189,133 @@ Pipeline::Pipeline()
 Pipeline::~Pipeline()
 {}
 
-void Pipeline::render()
+void Pipeline::render(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
+  std::vector<VkImageMemoryBarrier2> layoutBarriers
+  {
+    {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+      .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+      .srcAccessMask = 0,
+      .dstStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+      .dstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+      .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+      .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+      .image = vulkancontext::swapchainImages[imageIndex],
+      .subresourceRange
+      {
+        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .baseMipLevel = 0,
+        .levelCount = 1,
+        .baseArrayLayer = 0,
+        .layerCount = 1,
+      }
+    },
+    {
+      .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+      .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+      .srcAccessMask = 0,
+      .dstStageMask = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
+      .dstAccessMask = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+      .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+      .newLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+      .image = vulkancontext::depthImage,
+      .subresourceRange
+      {
+        .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
+        .baseMipLevel = 0,
+        .levelCount = 1,
+        .baseArrayLayer = 0,
+        .layerCount = 1,
+      }
+    }
+  };
 
+  VkDependencyInfo dependInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+    .imageMemoryBarrierCount = (uint32_t)(layoutBarriers.size()),
+    .pImageMemoryBarriers = layoutBarriers.data()
+  };
+  
+  VkRenderingAttachmentInfo colorAttachInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+    .imageView = vulkancontext::swapchainImageViews[imageIndex],
+    .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+    .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+    .clearValue{.color{0.93f, 0.9f, 0.9f, 1}}
+  };
+
+  VkRenderingAttachmentInfo depthAttachmentInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+    .imageView = vulkancontext::depthImageView,
+    .imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+    .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+    .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+    .clearValue{.depthStencil{1.0f, 0}}
+  };
+
+  VkRenderingInfo renderingInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+    .renderArea
+    {
+      .offset{.x = 0, .y = 0},
+      .extent{.width = vulkancontext::swapchainWidth, .height = vulkancontext::swapchainHeight}
+    },
+    .layerCount = 1,
+    .colorAttachmentCount = 1,
+    .pColorAttachments = &colorAttachInfo,
+    .pDepthAttachment = &depthAttachmentInfo
+  };
+
+  vkCmdBeginRendering(commandBuffer, &renderingInfo);
+  VkViewport viewport
+  {
+    .x = 0, .y = 0,
+    .width = (float)(vulkancontext::swapchainWidth),
+    .height = (float)(vulkancontext::swapchainHeight)
+  };
+  vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+  VkRect2D scissor
+  {
+    .offset{.x = 0, .y = 0},
+    .extent{.width = vulkancontext::swapchainWidth, .height = vulkancontext::swapchainHeight}
+  };
+  vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+  vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+  vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+  
+  vkCmdEndRendering(commandBuffer);
+  // below might come in main engine::render() 
+  VkImageMemoryBarrier2 presentLayoutBarrier
+  {
+    .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+    .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+    .srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+    .dstStageMask = VK_PIPELINE_STAGE_2_NONE,
+    .dstAccessMask = 0,
+    .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    .image = vulkancontext::swapchainImages[imageIndex],
+    .subresourceRange
+    {
+      .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+      .baseMipLevel = 0,
+      .levelCount = 1,
+      .baseArrayLayer = 0,
+      .layerCount = 1,
+    }
+  };
+  VkDependencyInfo presentDependInfo
+  {
+    .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+    .imageMemoryBarrierCount = 1,
+    .pImageMemoryBarriers = &presentLayoutBarrier
+  };
+  vkCmdPipelineBarrier2(commandBuffer, &presentDependInfo);
 }

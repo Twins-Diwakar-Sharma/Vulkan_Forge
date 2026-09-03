@@ -25,7 +25,7 @@ class Pipeline
     // instead create only new object for config in namespace, use that
     Pipeline();
     ~Pipeline();
-    void render();
+    void render(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
   private:
     static std::vector<char> readFile(const std::string& filepath);
