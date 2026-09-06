@@ -23,7 +23,7 @@ class Engine
     void render();
 
     uint64_t frameIndex = 0;
-    uint64_t nextSignalValue = vulkancontext_MaxFramesInFlight;
+    uint64_t nextSignalValue = vulkancontext_MaxFramesInFlight + 1;
     bool requireSwapchainRecreate = false;
   public:
     // Members

@@ -3,9 +3,8 @@
 
 namespace vulkancontext
 {
-  
-  namespace {
-
+  namespace 
+  {
     bool createVulkanInstance(const std::string& appName)
     {
       uint32_t glfwExtensionsCount = 0;

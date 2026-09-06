@@ -81,7 +81,7 @@ void Pipeline::createGraphicsPipeline(const std::string& vertFilePath, const std
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo
   {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-      .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
+     .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
   };
 
   VkPipelineDepthStencilStateCreateInfo depthStencilInfo
@@ -120,7 +120,10 @@ void Pipeline::createGraphicsPipeline(const std::string& vertFilePath, const std
   VkPipelineColorBlendAttachmentState blendAttachState
   {
     .blendEnable = VK_FALSE,
-    .colorWriteMask = VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_A_BIT,
+    .colorWriteMask = VK_COLOR_COMPONENT_R_BIT 
+      | VK_COLOR_COMPONENT_G_BIT 
+      | VK_COLOR_COMPONENT_B_BIT 
+      | VK_COLOR_COMPONENT_A_BIT,
   };
 
   VkPipelineColorBlendStateCreateInfo blendInfo
@@ -237,6 +240,8 @@ void Pipeline::render(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     .imageMemoryBarrierCount = (uint32_t)(layoutBarriers.size()),
     .pImageMemoryBarriers = layoutBarriers.data()
   };
+
+  vkCmdPipelineBarrier2(commandBuffer, &dependInfo);
   
   VkRenderingAttachmentInfo colorAttachInfo
   {

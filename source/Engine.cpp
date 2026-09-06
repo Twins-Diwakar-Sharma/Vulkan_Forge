@@ -20,7 +20,6 @@ void Engine::run()
     update();
     render();
   }
-  vkDeviceWaitIdle(vulkancontext::logicalDevice);
 }
 
 void Engine::update()
@@ -59,12 +58,17 @@ void Engine::render()
   // Now start recording commands
   FrameResource& res = vulkancontext::frameResources[frameResIndex];
   vkResetCommandPool(vulkancontext::logicalDevice, res.commandPool, 0);
-  VkSemaphore imageAcquiredSemaphore = vulkancontext::frameResources[frameResIndex].imageAcquiredSemaphore;
+  VkSemaphore imageAcquiredSemaphore = res.imageAcquiredSemaphore;
 
   uint32_t imageIndex = 0;
   VkResult acquireResult = vkAcquireNextImageKHR(vulkancontext::logicalDevice, vulkancontext::swapchain, UINT64_MAX, imageAcquiredSemaphore, VK_NULL_HANDLE, &imageIndex);
   
-  if(acquireResult == VK_ERROR_OUT_OF_DATE_KHR)
+  if(acquireResult == VK_ERROR_OUT_OF_DATE_KHR) // cannot render this frame, recreate this
+  { 
+    requireSwapchainRecreate = true;
+    return;
+  }
+  else if(acquireResult == VK_SUBOPTIMAL_KHR) // can render this frame, recreate next
   {
     requireSwapchainRecreate = true;
   }
