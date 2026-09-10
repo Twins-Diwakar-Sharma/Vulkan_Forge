@@ -3,9 +3,7 @@
 
 #include <vector>
 #include <vulkan/vulkan.hpp>
-#include <iostream>
-#include <stdexcept>
-#include <string>
+#include "scribe.hpp"
 #include "vk_mem_alloc.h"
 #include <GLFW/glfw3.h>
 
