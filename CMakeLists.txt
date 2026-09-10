@@ -26,21 +26,21 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
 set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/source)
 set(
   SOURCES 
-  ${SOURCE_DIR}/main.cpp
-  ${SOURCE_DIR}/Khidki.cpp
-  ${SOURCE_DIR}/Engine.cpp
-  ${SOURCE_DIR}/VulkanContext.cpp
-  ${SOURCE_DIR}/Pipeline.cpp
+  ${SOURCE_DIR}/Core.cpp
+  ${SOURCE_DIR}/arsenal.cpp
+  ${SOURCE_DIR}/aether.cpp
+  ${SOURCE_DIR}/Window.cpp
 ) 
 
 set(INC_DIR ${CMAKE_SOURCE_DIR}/include)
 set(
   HEADER_FILES 
   ${INC_DIR}/vk_mem_alloc.h
-  ${INC_DIR}/Engine.hpp
-  ${INC_DIR}/Khidki.hpp
-  ${INC_DIR}/VulkanContext.hpp
-  ${INC_DIR}/Pipeline.hpp
+  ${INC_DIR}/scribe.hpp
+  ${INC_DIR}/Core.hpp
+  ${INC_DIR}/arsenal.hpp
+  ${INC_DIR}/aether.hpp
+  ${INC_DIR}/Window.hpp
 )
 
 set(SHADERS_DIR ${CMAKE_SOURCE_DIR}/shaders)

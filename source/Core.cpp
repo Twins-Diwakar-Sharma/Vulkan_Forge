@@ -1,18 +1,24 @@
-#include "ArcReactor.hpp"
+#include "Core.hpp"
 
-ArcReactor::ArcReactor()
+int main()
+{
+  Core core;
+  core.pump();
+}
+
+Core::Core()
 {
   forge::arsenal::evoke(&appName, win.getWindowPointer(), WIDTH, HEIGHT);
 }
 
-ArcReactor::~ArcReactor()
+Core::~Core()
 {
   vkDeviceWaitIdle(forge::arsenal::device);
 
   forge::arsenal::eradicate();
 }
 
-void ArcReactor::pump()
+void Core::pump()
 {
   while(!win.shouldClose())
   {
@@ -22,20 +28,20 @@ void ArcReactor::pump()
   }
 }
 
-void ArcReactor::input()
+void Core::input()
 {
   win.handleKey(); 
   glfwPollEvents();
 }
 
 
-void ArcReactor::update()
+void Core::update()
 {
 
 }
 
 
-void ArcReactor::render()
+void Core::render()
 {
 
 }

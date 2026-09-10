@@ -1,11 +1,11 @@
-#ifndef H_4RC_REACT0R_H
-#define H_4RC_REACT0R_H
+#ifndef H_C0R3_H
+#define H_C0R3_H
 
 #include "scribe.hpp"
 #include "Window.hpp"
 #include "arsenal.hpp"
 
-class ArcReactor
+class Core
 {
 private:
   std::string appName = "Vulkan_Forge";
@@ -19,8 +19,8 @@ private:
 
 public:
   void pump();
-  ArcReactor();
-  ~ArcReactor();
+  Core();
+  ~Core();
 };
 
 #endif
