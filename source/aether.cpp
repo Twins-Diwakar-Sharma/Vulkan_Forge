@@ -98,6 +98,7 @@ namespace forge::aether
     std::vector<VkImageView> imageViews;
     std::vector<VkSemaphore> renderDoneSemaphores;
     uint32_t num_images = 2;
+    bool recreate = false;
 
     VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
     VkImage depthImage = VK_NULL_HANDLE;
@@ -290,7 +291,8 @@ namespace forge::aether
           vmaDestroyImage(forge::arsenal::vmaAllocator, depthImage, depthImageAllocation);
           depthImageView = nullptr;
         }
-
+        
+        scribe("aether::swap: eradictaed");
       }
     } // end of swap
 }

@@ -29,6 +29,7 @@ namespace forge::aether
     extern std::vector<VkImageView> imageViews;
     extern std::vector<VkSemaphore> renderDoneSemaphores;
     extern uint32_t num_images; 
+    extern bool recreate;
 
     extern VkFormat depthFormat;
     extern VkImage depthImage;
