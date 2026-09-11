@@ -95,7 +95,7 @@ void Core::render()
   VkSemaphoreSubmitInfoKHR drawWaitInfos[]
   {
     {
-      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO_KHR,
+      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
       .pNext = nullptr,
       .semaphore = forge::aether::frames::presentDoneSemaphores[inFlightIndex],
       .value = 0,
@@ -103,26 +103,26 @@ void Core::render()
       .deviceIndex = 0
     }
   };
-  VkCommandBufferSubmitInfoKHR drawCommandBufferInfos[]
+  VkCommandBufferSubmitInfo drawCommandBufferInfos[]
   {
     {
-      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO_KHR,
+      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
       .pNext = nullptr,
       .commandBuffer = forge::aether::frames::commandBuffers[inFlightIndex],
       .deviceMask = 0
     }
   };
-  VkSemaphoreSubmitInfoKHR drawSignalInfos[]
+  VkSemaphoreSubmitInfo drawSignalInfos[]
   {
     {
-      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO_KHR,
+      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
       .pNext = nullptr,
       .semaphore = forge::aether::swap::renderDoneSemaphores[swapchainImageIndex],
       .value = 0,
       .stageMask = VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT,
     },
     {
-      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO_KHR,
+      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
       .pNext = nullptr,
       .semaphore = forge::aether::frames::timelineSemaphore,
       .value = signalValue,
@@ -141,7 +141,43 @@ void Core::render()
     .signalSemaphoreInfoCount = 2,
     .pSignalSemaphoreInfos = drawSignalInfos,
   };
-  vkQueueSubmit2(forge::arsenal::graphicsQueue, 1, &submitInfoV2, VK_NULL_HANDLE);
+  VkSubmitInfo2 empty
+  {
+    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+  };
+
+PFN_vkQueueSubmit2KHR submit2KHR =
+    reinterpret_cast<PFN_vkQueueSubmit2KHR>(
+        vkGetDeviceProcAddr(
+            forge::arsenal::device,
+            "vkQueueSubmit2KHR"
+        )
+    );
+
+std::cout << "vkQueueSubmit2KHR = "
+          << reinterpret_cast<void*>(submit2KHR)
+          << '\n';
+VkSubmitInfo2KHR submit{
+    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2_KHR,
+    .pNext = nullptr,
+    .flags = 0,
+    .waitSemaphoreInfoCount = 0,
+    .pWaitSemaphoreInfos = nullptr,
+    .commandBufferInfoCount = 0,
+    .pCommandBufferInfos = nullptr,
+    .signalSemaphoreInfoCount = 0,
+    .pSignalSemaphoreInfos = nullptr
+};
+
+VkResult result = submit2KHR(
+    forge::arsenal::graphicsQueue,
+    1,
+    &submit,
+    VK_NULL_HANDLE
+);
+
+
+  //vkQueueSubmit2(forge::arsenal::graphicsQueue, 1, &empty, VK_NULL_HANDLE);
   /*
   uint64_t signalValues[] = {0, signalValue};
   VkTimelineSemaphoreSubmitInfoKHR timeSemaSubmit

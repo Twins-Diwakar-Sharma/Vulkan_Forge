@@ -15,6 +15,7 @@ pkgs.mkShell {
     shaderc  #provides glslc
     #spriv-tools
     #spriv-headers
+    gdb
   ];
 
   inputsFrom = with pkgs; [

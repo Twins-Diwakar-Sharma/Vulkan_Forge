@@ -211,10 +211,11 @@ namespace forge::aether
         }
       
         renderDoneSemaphores.resize(num_images);
-        for(VkSemaphore &semaphore : renderDoneSemaphores)
+        for(unsigned int i=0; i<renderDoneSemaphores.size(); i++)
         {
           VkSemaphoreCreateInfo semaphoreInfo{.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-          if(vkCreateSemaphore(forge::arsenal::device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS)
+          scribe("aether::swap: Creating renderDoneSemaphore index " + std::to_string(i));
+          if(vkCreateSemaphore(forge::arsenal::device, &semaphoreInfo, nullptr, &renderDoneSemaphores[i]) != VK_SUCCESS)
           {
             throw std::runtime_error("aether::swap: unable to create renderDoneSemaphore");
           }

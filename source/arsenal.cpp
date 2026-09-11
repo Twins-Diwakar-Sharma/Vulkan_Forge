@@ -79,22 +79,26 @@ namespace forge::arsenal
       scribe("Number of GPUs : "  + std::to_string(physicalDevices.size()) );
       
       bool descreteSelected = false;
+      VkPhysicalDeviceProperties props{};
       if(physicalDeviceCount)
       {
         physicalDevice = physicalDevices[0];
         for(auto &pDev : physicalDevices)
         {
-          VkPhysicalDeviceProperties props{};
+          //VkPhysicalDeviceProperties props{};
           vkGetPhysicalDeviceProperties(pDev, &props);
           scribe(" -- device name -- " + std::string(props.deviceName) );;
           if(props.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
           {
             physicalDevice = pDev;
             descreteSelected = true;
+
             break;
           }
         }
       }
+      scribe(" -- forcing to select llvpipewire -- ");
+      physicalDevice = physicalDevices[1];
       if(descreteSelected)
       {
         scribe("Selected DESCRETE GPU");
@@ -103,6 +107,14 @@ namespace forge::arsenal
       {
         scribe("Selected INTEGRATED GPU");
       }
+
+        std::cout << "------ yahan pe-----------" << std::endl;
+std::cout
+    << "Device Vulkan API version: "
+    << VK_VERSION_MAJOR(props.apiVersion) << "."
+    << VK_VERSION_MINOR(props.apiVersion) << "."
+    << VK_VERSION_PATCH(props.apiVersion)
+    << '\n';
 
     }
 
@@ -179,7 +191,7 @@ namespace forge::arsenal
         .pQueuePriorities = queuePriorities.data()
       };
 
-      const std::vector<const char *> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME};
+      const std::vector<const char *> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
       VkDeviceCreateInfo deviceCreateInfo
       {
@@ -196,13 +208,49 @@ namespace forge::arsenal
       {
         return arsenal::failure;
       }
+  std::cout << "---- yahan pe 2 -----" << std::endl;
+auto pSubmit2 =
+    vkGetDeviceProcAddr(
+        device,
+        "vkQueueSubmit2"
+    );
+
+std::cout << "device vkQueueSubmit2 = "
+          << reinterpret_cast<void*>(pSubmit2)
+          << '\n';
+auto pGetQueue =
+    vkGetDeviceProcAddr(device, "vkGetDeviceQueue");
+
+auto pQueueSubmit =
+    vkGetDeviceProcAddr(device, "vkQueueSubmit");
+
+auto pQueueSubmit2 =
+    vkGetDeviceProcAddr(device, "vkQueueSubmit2");
+
+auto pQueueWaitIdle =
+    vkGetDeviceProcAddr(device, "vkQueueWaitIdle");
+
+std::cout << "vkGetDeviceQueue  = "
+          << reinterpret_cast<void*>(pGetQueue) << '\n';
+
+std::cout << "vkQueueSubmit     = "
+          << reinterpret_cast<void*>(pQueueSubmit) << '\n';
+
+std::cout << "vkQueueSubmit2    = "
+          << reinterpret_cast<void*>(pQueueSubmit2) << '\n';
+
+std::cout << "vkQueueWaitIdle   = "
+          << reinterpret_cast<void*>(pQueueWaitIdle) << '\n';
+
+
+
       return arsenal::success;
     }
 
     uint8_t getGraphicsQueuefromDevice()
     {
       vkGetDeviceQueue(device, graphicsQueueFamilyIndex, 0, &graphicsQueue);
-      if(!graphicsQueue)
+      if(graphicsQueue == VK_NULL_HANDLE)
       {
         return arsenal::failure;
       }
