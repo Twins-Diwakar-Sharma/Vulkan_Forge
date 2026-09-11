@@ -1,3 +1,4 @@
+#define VMA_IMPLEMENTATION 
 #include "arsenal.hpp"
 namespace forge::arsenal
 {
@@ -71,6 +72,7 @@ namespace forge::arsenal
     {
       uint32_t physicalDeviceCount = 0;
       vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+
       std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
       vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data());
       
@@ -136,7 +138,7 @@ namespace forge::arsenal
 
       if(!supported13Features.dynamicRendering || !supported13Features.synchronization2 || !supported12Features.timelineSemaphore)
       {
-        std::cerr << "Physical Device does not meet required features" << std::endl;
+        scribe("Physical Device does not meet required features");
         return false;
       }
 
@@ -165,6 +167,7 @@ namespace forge::arsenal
       };
 
       VkPhysicalDeviceFeatures2 usingFeatures{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, .pNext = &featuresBeingUsed12};
+      
 
       // setting queue priorities
       std::vector<float> queuePriorities{1.0f};
@@ -176,7 +179,7 @@ namespace forge::arsenal
         .pQueuePriorities = queuePriorities.data()
       };
 
-      const std::vector<const char *> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+      const std::vector<const char *> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME};
 
       VkDeviceCreateInfo deviceCreateInfo
       {
@@ -228,7 +231,6 @@ namespace forge::arsenal
   } // end of unnamed namespace, private
   
 
-  uint32_t vulkanApiVersion = VK_VERSION_1_4;
   VkInstance instance = VK_NULL_HANDLE;
   VkSurfaceKHR surface = VK_NULL_HANDLE;
   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;

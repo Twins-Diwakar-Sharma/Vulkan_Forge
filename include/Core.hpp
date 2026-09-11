@@ -4,6 +4,7 @@
 #include "scribe.hpp"
 #include "Window.hpp"
 #include "arsenal.hpp"
+#include "aether.hpp"
 
 class Core
 {

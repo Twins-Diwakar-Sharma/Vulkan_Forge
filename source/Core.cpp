@@ -9,12 +9,16 @@ int main()
 Core::Core()
 {
   forge::arsenal::evoke(&appName, win.getWindowPointer(), WIDTH, HEIGHT);
+  forge::aether::frames::evoke();
+  forge::aether::swap::evoke(win.getWindowPointer());
 }
 
 Core::~Core()
 {
   vkDeviceWaitIdle(forge::arsenal::device);
-
+  
+  forge::aether::swap::eradicate();
+  forge::aether::frames::eradicate();
   forge::arsenal::eradicate();
 }
 

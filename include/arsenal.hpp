@@ -15,7 +15,7 @@ namespace forge
     static constexpr uint8_t success = 0;
     static constexpr uint8_t failure = 1;
 
-    extern uint32_t vulkanApiVersion;
+    static constexpr uint32_t vulkanApiVersion = VK_API_VERSION_1_3;
     extern VkInstance instance;
     extern VkSurfaceKHR surface;
     extern VkPhysicalDevice physicalDevice;
