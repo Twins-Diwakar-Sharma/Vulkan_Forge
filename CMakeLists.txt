@@ -27,9 +27,12 @@ set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/source)
 set(
   SOURCES 
   ${SOURCE_DIR}/Core.cpp
+  ${SOURCE_DIR}/Window.cpp
   ${SOURCE_DIR}/arsenal.cpp
   ${SOURCE_DIR}/aether.cpp
-  ${SOURCE_DIR}/Window.cpp
+  ${SOURCE_DIR}/crypt.cpp
+  ${SOURCE_DIR}/Pipe.cpp
+  ${SOURCE_DIR}/sanctum.cpp
 ) 
 
 set(INC_DIR ${CMAKE_SOURCE_DIR}/include)
@@ -38,9 +41,12 @@ set(
   ${INC_DIR}/vk_mem_alloc.h
   ${INC_DIR}/scribe.hpp
   ${INC_DIR}/Core.hpp
+  ${INC_DIR}/Window.hpp
   ${INC_DIR}/arsenal.hpp
   ${INC_DIR}/aether.hpp
-  ${INC_DIR}/Window.hpp
+  ${INC_DIR}/crypt.hpp
+  ${INC_DIR}/Pipe.hpp
+  ${INC_DIR}/sanctum.hpp
 )
 
 set(SHADERS_DIR ${CMAKE_SOURCE_DIR}/shaders)

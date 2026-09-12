@@ -1,63 +1,64 @@
-#include "Pipeline.hpp"
+#include "Pipe.hpp"
 
-std::vector<char> Pipeline::readFile(const std::string& filePath) 
+Pipe::Pipe()
+{}
+
+Pipe::~Pipe()
 {
-
-    std::ifstream file(filePath, std::ios::ate | std::ios::binary);
-    
-    if(!file.is_open()) 
-    {
-      throw std::runtime_error("failed to open file:" + filePath);
-    }
-
-    size_t fileSize = static_cast<size_t>(file.tellg());
-    std::vector<char> buffer(fileSize);
-
-    file.seekg(0);
-    file.read(buffer.data(), fileSize);
-
-    file.close();
-    return buffer;
+  if(soul != nullptr)
+    soul = nullptr; // donot delete yourself, only external, souls always remain
 }
 
-VkShaderModule Pipeline::createShaderModule(const std::vector<char>& code)
+VkShaderModule Pipe::createShaderModule(const std::string& filePath)
 {
+  std::ifstream file(filePath, std::ios::ate | std::ios::binary);
+  if(!file.is_open()) 
+  {
+    throw std::runtime_error("Pipe: failed to open file: " + filePath);
+  }
+  size_t fileSize = static_cast<size_t>(file.tellg());
+  std::vector<char> buffer(fileSize);
+  file.seekg(0);
+  file.read(buffer.data(), fileSize);
+  file.close();
   VkShaderModuleCreateInfo createInfo
   {
     .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-    .codeSize = code.size(),
-    .pCode = (uint32_t*)(code.data())
+    .codeSize = buffer.size(),
+    .pCode = (uint32_t*)(buffer.data())
   };
   VkShaderModule shaderModule;
-  if(vkCreateShaderModule(vulkancontext::logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+  if(vkCreateShaderModule(forge::arsenal::device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
   {
-    throw std::runtime_error("Failed to create shader module!"); 
+    throw std::runtime_error("Pipe: Failed to create shader module for: " + filePath); 
   }
   return shaderModule;
-}
 
-void Pipeline::createGraphicsPipeline(const std::string& vertFilePath, const std::string& fragFilePath)
+}
+void Pipe::ensoul(PipeSoul *soul)
 {
-  std::vector<char> vertShaderCode = readFile(vertFilePath);
-  std::vector<char> fragShaderCode = readFile(fragFilePath);
-  VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-  VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
-  
+  scribe("Pipe: ensouling with soul: " + (soul->name));
+  std::string vertFilePath = "shaders/" + (soul->name) + ".vert.spv";
+  std::string fragFilePath = "shaders/" + (soul->name) + ".frag.spv";
+
+  VkShaderModule vertShaderModule = createShaderModule(vertFilePath);
+  VkShaderModule fragShaderModule = createShaderModule(fragFilePath);
+
   VkPipelineLayoutCreateInfo pipelineLayoutInfo
   {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-    .setLayoutCount = 0,
-    .pushConstantRangeCount = 0
+    .setLayoutCount = soul->setLayoutCount,
+    .pushConstantRangeCount = soul->pushConstantRangeCount,
   };
-  
-  if(vkCreatePipelineLayout(vulkancontext::logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+
+  if(vkCreatePipelineLayout(forge::arsenal::device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
   {
-    std::cout << "Unable to create pipeline layout" << std::endl; 
-    return;
+    throw std::runtime_error("Pipe: unable to create pipelinelayout"); 
   }
 
+  uint32_t shaderStagesCount = 2;
   const char* entryPoint = "main";
-  std::vector<VkPipelineShaderStageCreateInfo> shaderStages
+  VkPipelineShaderStageCreateInfo shaderStages[] = 
   {
     {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -81,7 +82,7 @@ void Pipeline::createGraphicsPipeline(const std::string& vertFilePath, const std
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo
   {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-     .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
+     .topology = soul->topology 
   };
 
   VkPipelineDepthStencilStateCreateInfo depthStencilInfo
@@ -125,7 +126,6 @@ void Pipeline::createGraphicsPipeline(const std::string& vertFilePath, const std
       | VK_COLOR_COMPONENT_B_BIT 
       | VK_COLOR_COMPONENT_A_BIT,
   };
-
   VkPipelineColorBlendStateCreateInfo blendInfo
   {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
@@ -133,32 +133,36 @@ void Pipeline::createGraphicsPipeline(const std::string& vertFilePath, const std
     .pAttachments = &blendAttachState
   };
 
-  std::vector<VkDynamicState> dynamicStates
+  uint32_t dynamicStatesCount = 2;
+  VkDynamicState dynamicStates[] = 
   {
-    VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR
+    VK_DYNAMIC_STATE_VIEWPORT, 
+    VK_DYNAMIC_STATE_SCISSOR
   };
+
   VkPipelineDynamicStateCreateInfo dynamicStateInfo
   {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
-    .dynamicStateCount = (uint32_t)dynamicStates.size(),
-    .pDynamicStates = dynamicStates.data()
+    .dynamicStateCount = dynamicStatesCount,
+    .pDynamicStates = dynamicStates
   };
-
+  
+  // [ALERT] KHR dynamic render
   VkPipelineRenderingCreateInfo renderInfo
   {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
     .colorAttachmentCount = 1,
-    .pColorAttachmentFormats = &vulkancontext::swapchainFormat,
-    .depthAttachmentFormat = vulkancontext::depthFormat,
+    .pColorAttachmentFormats = &forge::aether::swap::colorFormat,
+    .depthAttachmentFormat = forge::aether::swap::depthFormat,
   };
-  
+
   // summary
   VkGraphicsPipelineCreateInfo pipelineInfo
   {
     .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
     .pNext = &renderInfo,
-    .stageCount = (uint32_t)shaderStages.size(),
-    .pStages = shaderStages.data(),
+    .stageCount = shaderStagesCount,
+    .pStages = shaderStages,
     .pVertexInputState = &vertInputInfo,
     .pInputAssemblyState = &inputAssemblyInfo,
     .pViewportState = &viewportInfo,
@@ -170,32 +174,29 @@ void Pipeline::createGraphicsPipeline(const std::string& vertFilePath, const std
     .layout = pipelineLayout,
     .renderPass = VK_NULL_HANDLE,
   };
-  
-  if(vkCreateGraphicsPipelines(vulkancontext::logicalDevice, nullptr, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+
+  if(vkCreateGraphicsPipelines(forge::arsenal::device, nullptr, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
   {
-    throw std::runtime_error("unable to create vulkan graphics pipeline"); 
+    throw std::runtime_error("Pipe: unable to create vulkan graphics pipeline"); 
   }
-  vkDestroyShaderModule(vulkancontext::logicalDevice, fragShaderModule, nullptr);
-  vkDestroyShaderModule(vulkancontext::logicalDevice, vertShaderModule, nullptr);
+
+  vkDestroyShaderModule(forge::arsenal::device, fragShaderModule, nullptr);
+  vkDestroyShaderModule(forge::arsenal::device, vertShaderModule, nullptr);
+
+  scribe("Pipe: ensouling done");
 }
 
-void Pipeline::makePipeline(std::string name)
+void Pipe::draw(uint32_t inFlightIndex, uint32_t swapchainImageIndex)
 {
-  this->name = name;
-  std::string vertFilePath = "shaders/" + name + ".vert.spv";
-  std::string fragFilePath = "shaders/" + name + ".frag.spv";
-  createGraphicsPipeline(vertFilePath, fragFilePath);
-}
+  
 
-Pipeline::Pipeline()
-{}
-Pipeline::~Pipeline()
-{}
+  // [TODO] make it specific to soul,
+  // [TODO] loop each subpass and add layer for each
+  uint32_t layoutBarriersCount = 2;
 
-void Pipeline::render(VkCommandBuffer commandBuffer, uint32_t imageIndex)
-{
-  std::vector<VkImageMemoryBarrier2> layoutBarriers
-  {
+  // [ALERT] KHR dynm render
+  VkImageMemoryBarrier2 layoutBarriers[]
+  { 
     {
       .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
       .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -204,7 +205,7 @@ void Pipeline::render(VkCommandBuffer commandBuffer, uint32_t imageIndex)
       .dstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
       .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
       .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-      .image = vulkancontext::swapchainImages[imageIndex],
+      .image = forge::aether::swap::images[swapchainImageIndex],
       .subresourceRange
       {
         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -222,7 +223,7 @@ void Pipeline::render(VkCommandBuffer commandBuffer, uint32_t imageIndex)
       .dstAccessMask = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
       .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
       .newLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-      .image = vulkancontext::depthImage,
+      .image = forge::aether::swap::depthImage,
       .subresourceRange
       {
         .aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT,
@@ -234,29 +235,29 @@ void Pipeline::render(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     }
   };
 
-  VkDependencyInfo dependInfo
+  VkDependencyInfo initBarrierDependInfo
   {
     .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-    .imageMemoryBarrierCount = (uint32_t)(layoutBarriers.size()),
-    .pImageMemoryBarriers = layoutBarriers.data()
+    .imageMemoryBarrierCount = layoutBarriersCount,
+    .pImageMemoryBarriers = layoutBarriers,
   };
 
-  vkCmdPipelineBarrier2(commandBuffer, &dependInfo);
-  
+  crypt::vkCmdPipelineBarrier2KHR(forge::aether::frames::commandBuffers[inFlightIndex], &initBarrierDependInfo);
+
   VkRenderingAttachmentInfo colorAttachInfo
   {
     .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-    .imageView = vulkancontext::swapchainImageViews[imageIndex],
+    .imageView = forge::aether::swap::imageViews[swapchainImageIndex],
     .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
     .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-    .clearValue{.color{0.93f, 0.9f, 0.9f, 1}}
+    .clearValue{.color{0.44f, 0.44f, 1.0f, 1}}
   };
 
   VkRenderingAttachmentInfo depthAttachmentInfo
   {
     .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-    .imageView = vulkancontext::depthImageView,
+    .imageView = forge::aether::swap::depthImageView,
     .imageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
     .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
     .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
@@ -269,7 +270,7 @@ void Pipeline::render(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     .renderArea
     {
       .offset{.x = 0, .y = 0},
-      .extent{.width = vulkancontext::swapchainWidth, .height = vulkancontext::swapchainHeight}
+      .extent{.width = forge::aether::swap::width, .height = forge::aether::swap::height}
     },
     .layerCount = 1,
     .colorAttachmentCount = 1,
@@ -277,25 +278,30 @@ void Pipeline::render(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     .pDepthAttachment = &depthAttachmentInfo
   };
 
-  vkCmdBeginRendering(commandBuffer, &renderingInfo);
+  // [ALERTcheck]
+  // vkCmdBeginRendering(forge::aether::frames::commandBuffers[inFlightIndex], &renderingInfo);
+  crypt::vkCmdBeginRenderingKHR(forge::aether::frames::commandBuffers[inFlightIndex], &renderingInfo);
   VkViewport viewport
   {
     .x = 0, .y = 0,
-    .width = (float)(vulkancontext::swapchainWidth),
-    .height = (float)(vulkancontext::swapchainHeight)
+    .width = (float)(forge::aether::swap::width),
+    .height = (float)(forge::aether::swap::height)
   };
-  vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+  vkCmdSetViewport(forge::aether::frames::commandBuffers[inFlightIndex], 0, 1, &viewport);
   VkRect2D scissor
   {
     .offset{.x = 0, .y = 0},
-    .extent{.width = vulkancontext::swapchainWidth, .height = vulkancontext::swapchainHeight}
+    .extent{.width = forge::aether::swap::width, .height = forge::aether::swap::height}
   };
-  vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-  vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-  vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+  vkCmdSetScissor(forge::aether::frames::commandBuffers[inFlightIndex], 0, 1, &scissor);
   
-  vkCmdEndRendering(commandBuffer);
+  // [ALERT] 
+  vkCmdBindPipeline(forge::aether::frames::commandBuffers[inFlightIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+  vkCmdDraw(forge::aether::frames::commandBuffers[inFlightIndex], 3, 1, 0, 0);
+ 
+  // [ALERT] 
+  //vkCmdEndRendering(forge::aether::frames::commandBuffers[inFlightIndex]);
+  crypt::vkCmdEndRenderingKHR(forge::aether::frames::commandBuffers[inFlightIndex]);
   // below might come in main engine::render() 
   VkImageMemoryBarrier2 presentLayoutBarrier
   {
@@ -306,7 +312,7 @@ void Pipeline::render(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     .dstAccessMask = 0,
     .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
     .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-    .image = vulkancontext::swapchainImages[imageIndex],
+    .image = forge::aether::swap::images[swapchainImageIndex],
     .subresourceRange
     {
       .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -322,5 +328,7 @@ void Pipeline::render(VkCommandBuffer commandBuffer, uint32_t imageIndex)
     .imageMemoryBarrierCount = 1,
     .pImageMemoryBarriers = &presentLayoutBarrier
   };
-  vkCmdPipelineBarrier2(commandBuffer, &presentDependInfo);
+  crypt::vkCmdPipelineBarrier2KHR(forge::aether::frames::commandBuffers[inFlightIndex], &presentDependInfo);
+
+
 }

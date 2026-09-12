@@ -97,8 +97,7 @@ namespace forge::arsenal
           }
         }
       }
-      scribe(" -- forcing to select llvpipewire -- ");
-      physicalDevice = physicalDevices[1];
+
       if(descreteSelected)
       {
         scribe("Selected DESCRETE GPU");
@@ -107,14 +106,6 @@ namespace forge::arsenal
       {
         scribe("Selected INTEGRATED GPU");
       }
-
-        std::cout << "------ yahan pe-----------" << std::endl;
-std::cout
-    << "Device Vulkan API version: "
-    << VK_VERSION_MAJOR(props.apiVersion) << "."
-    << VK_VERSION_MINOR(props.apiVersion) << "."
-    << VK_VERSION_PATCH(props.apiVersion)
-    << '\n';
 
     }
 
@@ -141,23 +132,38 @@ std::cout
 
     uint8_t createLogicalDevice()
     {
+      /* sad device too old 
       VkPhysicalDeviceVulkan14Features supported14Features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES, .pNext = nullptr};
       VkPhysicalDeviceVulkan13Features supported13Features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES, .pNext = &supported14Features};
-      VkPhysicalDeviceVulkan12Features supported12Features{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES, .pNext = &supported13Features};
+
+      */
+      VkPhysicalDeviceSynchronization2FeaturesKHR supportedSync2Features
+      {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR, 
+        .pNext = nullptr
+      };
+      VkPhysicalDeviceDynamicRenderingFeaturesKHR supportedDynamicRenderingFeatures
+      {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR, 
+        .pNext = &supportedSync2Features
+      };
+      VkPhysicalDeviceVulkan12Features supported12Features
+      {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES, 
+        .pNext = &supportedDynamicRenderingFeatures
+      };
 
       VkPhysicalDeviceFeatures2 supportedFeatures{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, .pNext = &supported12Features};
       vkGetPhysicalDeviceFeatures2(physicalDevice, &supportedFeatures);
 
-      if(!supported13Features.dynamicRendering || !supported13Features.synchronization2 || !supported12Features.timelineSemaphore)
+      //if(!supported13Features.dynamicRendering || !supported13Features.synchronization2 || !supported12Features.timelineSemaphore)
+      if(!supportedSync2Features.synchronization2 || !supportedDynamicRenderingFeatures.dynamicRendering || !supported12Features.timelineSemaphore)
       {
         scribe("Physical Device does not meet required features");
         return false;
       }
 
-      // Now produces seperate list for features you will use, edit it to add more later
-      // Directly using above instead, is a bad practice, it will enable everything and 
-      // add features which we donot need in this game
-      // NOTE: try to avoid NVIDIA or AMD specific features
+      /* graphics too old for this, sad :(
       VkPhysicalDeviceVulkan14Features featuresBeingUsed14
       {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_4_FEATURES, .pNext = nullptr
@@ -170,11 +176,26 @@ std::cout
         .synchronization2 = VK_TRUE,
         .dynamicRendering = VK_TRUE,
       };
+      */
+
+      VkPhysicalDeviceSynchronization2FeaturesKHR extendedFeatureSync2
+      {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR,
+        .pNext = nullptr,
+        .synchronization2 = VK_TRUE,
+      };
+      
+      VkPhysicalDeviceDynamicRenderingFeaturesKHR extendedFeatureDynRen
+      {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR,
+        .pNext = &extendedFeatureSync2,
+        .dynamicRendering = VK_TRUE,
+      };
 
       VkPhysicalDeviceVulkan12Features featuresBeingUsed12
       {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
-        .pNext = &featuresBeingUsed13,
+        .pNext = &extendedFeatureDynRen,
         .timelineSemaphore = VK_TRUE,
       };
 
@@ -191,7 +212,7 @@ std::cout
         .pQueuePriorities = queuePriorities.data()
       };
 
-      const std::vector<const char *> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+      const std::vector<const char *> deviceExtensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME};
 
       VkDeviceCreateInfo deviceCreateInfo
       {
@@ -208,42 +229,6 @@ std::cout
       {
         return arsenal::failure;
       }
-  std::cout << "---- yahan pe 2 -----" << std::endl;
-auto pSubmit2 =
-    vkGetDeviceProcAddr(
-        device,
-        "vkQueueSubmit2"
-    );
-
-std::cout << "device vkQueueSubmit2 = "
-          << reinterpret_cast<void*>(pSubmit2)
-          << '\n';
-auto pGetQueue =
-    vkGetDeviceProcAddr(device, "vkGetDeviceQueue");
-
-auto pQueueSubmit =
-    vkGetDeviceProcAddr(device, "vkQueueSubmit");
-
-auto pQueueSubmit2 =
-    vkGetDeviceProcAddr(device, "vkQueueSubmit2");
-
-auto pQueueWaitIdle =
-    vkGetDeviceProcAddr(device, "vkQueueWaitIdle");
-
-std::cout << "vkGetDeviceQueue  = "
-          << reinterpret_cast<void*>(pGetQueue) << '\n';
-
-std::cout << "vkQueueSubmit     = "
-          << reinterpret_cast<void*>(pQueueSubmit) << '\n';
-
-std::cout << "vkQueueSubmit2    = "
-          << reinterpret_cast<void*>(pQueueSubmit2) << '\n';
-
-std::cout << "vkQueueWaitIdle   = "
-          << reinterpret_cast<void*>(pQueueWaitIdle) << '\n';
-
-
-
       return arsenal::success;
     }
 

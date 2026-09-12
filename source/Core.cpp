@@ -11,12 +11,16 @@ Core::Core()
   forge::arsenal::evoke(&appName, win.getWindowPointer(), WIDTH, HEIGHT);
   forge::aether::frames::evoke();
   forge::aether::swap::evoke(win.getWindowPointer());
+  crypt::necromancy();
+
+  simplePipe.ensoul(&sanctum::pipesouls::simple);
 }
 
 Core::~Core()
 {
   vkDeviceWaitIdle(forge::arsenal::device);
-  
+ 
+  // crypt: cannot kill the dead
   forge::aether::swap::eradicate();
   forge::aether::frames::eradicate();
   forge::arsenal::eradicate();
@@ -41,7 +45,13 @@ void Core::input()
 
 void Core::update()
 {
-
+  if(forge::aether::swap::recreate)
+  {
+    vkDeviceWaitIdle(forge::arsenal::device);
+    forge::aether::swap::recreate = false;
+    forge::aether::swap::eradicate();
+    forge::aether::swap::evoke(win.getWindowPointer());
+  }
 }
 
 
@@ -69,7 +79,9 @@ void Core::render()
   
   // check if presentation is done
   uint32_t swapchainImageIndex = 0;
-  // [BLOCKING] [QUESTION: why presentDoneSemaphores indexed with frame inflight index and not swapchainIndex]
+  // [Non-Blocking GPU, BLOCKING CPU??], it does 2 things
+  // bloking: waits for swapchain image to be acquired by cpu
+  // non blocking sends a semaphore to GPU, this semaphore will be signaled in future when presentation is done
   VkResult acquireResult = vkAcquireNextImageKHR(forge::arsenal::device, forge::aether::swap::swapchain, UINT64_MAX, forge::aether::frames::presentDoneSemaphores[inFlightIndex], VK_NULL_HANDLE, &swapchainImageIndex);
 
   if(acquireResult == VK_ERROR_OUT_OF_DATE_KHR) // cannot render this frame, recreate this
@@ -89,9 +101,9 @@ void Core::render()
   };
   // [Non-Blocking]
   vkBeginCommandBuffer(forge::aether::frames::commandBuffers[inFlightIndex], &cmdBeginInfo);
+  simplePipe.draw(inFlightIndex, swapchainImageIndex);
   vkEndCommandBuffer(forge::aether::frames::commandBuffers[inFlightIndex]);
   
-  // [QUESTION]: why waiting for presentDoneSemaphores again? didnt we waited for it above in vkAcquireNextImageKHR
   VkSemaphoreSubmitInfoKHR drawWaitInfos[]
   {
     {
@@ -129,9 +141,10 @@ void Core::render()
       .stageMask = VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT,
     },
   };
-  VkSubmitInfo2 submitInfoV2
+  
+  VkSubmitInfo2KHR submitInfoV2
   {
-    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2_KHR,
     .pNext = nullptr,
     .flags = 0,
     .waitSemaphoreInfoCount = 1,
@@ -141,72 +154,13 @@ void Core::render()
     .signalSemaphoreInfoCount = 2,
     .pSignalSemaphoreInfos = drawSignalInfos,
   };
-  VkSubmitInfo2 empty
-  {
-    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
-  };
-
-PFN_vkQueueSubmit2KHR submit2KHR =
-    reinterpret_cast<PFN_vkQueueSubmit2KHR>(
-        vkGetDeviceProcAddr(
-            forge::arsenal::device,
-            "vkQueueSubmit2KHR"
-        )
-    );
-
-std::cout << "vkQueueSubmit2KHR = "
-          << reinterpret_cast<void*>(submit2KHR)
-          << '\n';
-VkSubmitInfo2KHR submit{
-    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2_KHR,
-    .pNext = nullptr,
-    .flags = 0,
-    .waitSemaphoreInfoCount = 0,
-    .pWaitSemaphoreInfos = nullptr,
-    .commandBufferInfoCount = 0,
-    .pCommandBufferInfos = nullptr,
-    .signalSemaphoreInfoCount = 0,
-    .pSignalSemaphoreInfos = nullptr
-};
-
-VkResult result = submit2KHR(
-    forge::arsenal::graphicsQueue,
-    1,
-    &submit,
-    VK_NULL_HANDLE
-);
-
-
-  //vkQueueSubmit2(forge::arsenal::graphicsQueue, 1, &empty, VK_NULL_HANDLE);
-  /*
-  uint64_t signalValues[] = {0, signalValue};
-  VkTimelineSemaphoreSubmitInfoKHR timeSemaSubmit
-  {
-    .sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO_KHR,
-    .pNext = nullptr,
-    .waitSemaphoreValueCount = 0,
-    .pWaitSemaphoreValues = nullptr,
-    .signalSemaphoreValueCount = 2,
-    .pSignalSemaphoreValues = signalValues,
-  };
-  VkSemaphore signalSemaphoresArray[] = {forge::aether::swap::renderDoneSemaphores[swapchainImageIndex], forge::aether::frames::timelineSemaphore};
-  VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT};
-  VkSubmitInfo submitInfoV1
-  {
-    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-    .pNext = &timeSemaSubmit,
-    .waitSemaphoreCount = 1,
-    .pWaitSemaphores = &forge::aether::frames::presentDoneSemaphores[inFlightIndex],
-    .pWaitDstStageMask = waitStages,
-    .commandBufferCount = 1,
-    .pCommandBuffers = &forge::aether::frames::commandBuffers[inFlightIndex],
-    .signalSemaphoreCount = 2,
-    .pSignalSemaphores = signalSemaphoresArray 
-  };
-  vkQueueSubmit(forge::arsenal::graphicsQueue, 1, &submitInfoV1, VK_NULL_HANDLE);
-  */
+  
+  // [Non-Blocking] will continue to draw
+  crypt::vkQueueSubmit2KHR(forge::arsenal::graphicsQueue, 1, &submitInfoV2, VK_NULL_HANDLE);
   
   // [QUESTION]: what semaphore does it suppose to signal after finishing
+  // [ANSWER]: none, vkAcquireNextImageKHR will signal the semaphore instead
+  // so they both must be used one after another
   VkPresentInfoKHR presentInfo
   {
     .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -217,7 +171,7 @@ VkResult result = submit2KHR(
     .pImageIndices = &swapchainImageIndex,
     .pResults = nullptr
   };
-  // [Non-Blocking]
+  // [Non-Blocking] GPU will wait for semaphore above 
   vkQueuePresentKHR(forge::arsenal::graphicsQueue, &presentInfo);
 }
 

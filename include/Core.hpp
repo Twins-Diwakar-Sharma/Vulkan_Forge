@@ -5,18 +5,23 @@
 #include "Window.hpp"
 #include "arsenal.hpp"
 #include "aether.hpp"
+#include "crypt.hpp"
+#include "sanctum.hpp"
+#include "Pipe.hpp"
 
 class Core
 {
 private:
+  void input();
+  void update();
+  void render();
+
   std::string appName = "Vulkan_Forge";
   forge::Window win{WIDTH, HEIGHT, appName};
   static constexpr uint32_t WIDTH = 800;
   static constexpr uint32_t HEIGHT = 16*WIDTH/9;
-
-  void input();
-  void update();
-  void render();
+  
+  Pipe simplePipe;
 
 public:
   void pump();
