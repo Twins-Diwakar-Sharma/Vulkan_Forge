@@ -10,7 +10,7 @@ namespace forge
   class Window
   {
     private:
-      GLFWwindow* pGLFWwindow = nullptr;
+      GLFWwindow* pGLFWwindow;
     public:
       Window(uint32_t WIDTH, uint32_t HEIGHT, std::string appName);
       ~Window();
