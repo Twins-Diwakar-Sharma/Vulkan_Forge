@@ -82,7 +82,7 @@ void Pipe::ensoul(PipeSoul *soul)
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo
   {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-     .topology = soul->topology 
+     .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
   };
 
   VkPipelineDepthStencilStateCreateInfo depthStencilInfo
@@ -275,7 +275,7 @@ void Pipe::draw(uint32_t inFlightIndex, uint32_t swapchainImageIndex)
     .layerCount = 1,
     .colorAttachmentCount = 1,
     .pColorAttachments = &colorAttachInfo,
-    .pDepthAttachment = &depthAttachmentInfo
+    .pDepthAttachment = &depthAttachmentInfo,
   };
 
   // [ALERTcheck]

@@ -18,8 +18,8 @@ private:
 
   std::string appName = "Vulkan_Forge";
   forge::Window win{WIDTH, HEIGHT, appName};
-  static constexpr uint32_t WIDTH = 800;
-  static constexpr uint32_t HEIGHT = 16*WIDTH/9;
+  static constexpr uint32_t HEIGHT = 600;
+  static constexpr uint32_t WIDTH = 16*HEIGHT/9;
   
   Pipe simplePipe;
 
