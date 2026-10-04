@@ -1,26 +1,44 @@
 [
 {
-  "directory": "/home/thanatos/programs/Vulkan_Forge/build",
-  "command": "/nix/store/788mx070y81zjlg5ipcl0cra3afviw9k-gcc-wrapper-15.2.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/thanatos/programs/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/main.cpp.o -c /home/thanatos/programs/Vulkan_Forge/source/main.cpp",
-  "file": "/home/thanatos/programs/Vulkan_Forge/source/main.cpp",
-  "output": "CMakeFiles/VulkanTest.dir/source/main.cpp.o"
+  "directory": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/build",
+  "command": "/nix/store/79mr0jw3qccq7hhf1hh62knxd88dwazc-gcc-wrapper-15.3.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/frostmourne/Programs/diwakar/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Core.cpp.o -c /home/frostmourne/Programs/diwakar/Vulkan_Forge/source/Core.cpp",
+  "file": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/source/Core.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/Core.cpp.o"
 },
 {
-  "directory": "/home/thanatos/programs/Vulkan_Forge/build",
-  "command": "/nix/store/788mx070y81zjlg5ipcl0cra3afviw9k-gcc-wrapper-15.2.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/thanatos/programs/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Khidki.cpp.o -c /home/thanatos/programs/Vulkan_Forge/source/Khidki.cpp",
-  "file": "/home/thanatos/programs/Vulkan_Forge/source/Khidki.cpp",
-  "output": "CMakeFiles/VulkanTest.dir/source/Khidki.cpp.o"
+  "directory": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/build",
+  "command": "/nix/store/79mr0jw3qccq7hhf1hh62knxd88dwazc-gcc-wrapper-15.3.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/frostmourne/Programs/diwakar/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Window.cpp.o -c /home/frostmourne/Programs/diwakar/Vulkan_Forge/source/Window.cpp",
+  "file": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/source/Window.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/Window.cpp.o"
 },
 {
-  "directory": "/home/thanatos/programs/Vulkan_Forge/build",
-  "command": "/nix/store/788mx070y81zjlg5ipcl0cra3afviw9k-gcc-wrapper-15.2.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/thanatos/programs/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Engine.cpp.o -c /home/thanatos/programs/Vulkan_Forge/source/Engine.cpp",
-  "file": "/home/thanatos/programs/Vulkan_Forge/source/Engine.cpp",
-  "output": "CMakeFiles/VulkanTest.dir/source/Engine.cpp.o"
+  "directory": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/build",
+  "command": "/nix/store/79mr0jw3qccq7hhf1hh62knxd88dwazc-gcc-wrapper-15.3.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/frostmourne/Programs/diwakar/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/arsenal.cpp.o -c /home/frostmourne/Programs/diwakar/Vulkan_Forge/source/arsenal.cpp",
+  "file": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/source/arsenal.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/arsenal.cpp.o"
 },
 {
-  "directory": "/home/thanatos/programs/Vulkan_Forge/build",
-  "command": "/nix/store/788mx070y81zjlg5ipcl0cra3afviw9k-gcc-wrapper-15.2.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/thanatos/programs/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/VulkanContext.cpp.o -c /home/thanatos/programs/Vulkan_Forge/source/VulkanContext.cpp",
-  "file": "/home/thanatos/programs/Vulkan_Forge/source/VulkanContext.cpp",
-  "output": "CMakeFiles/VulkanTest.dir/source/VulkanContext.cpp.o"
+  "directory": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/build",
+  "command": "/nix/store/79mr0jw3qccq7hhf1hh62knxd88dwazc-gcc-wrapper-15.3.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/frostmourne/Programs/diwakar/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/aether.cpp.o -c /home/frostmourne/Programs/diwakar/Vulkan_Forge/source/aether.cpp",
+  "file": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/source/aether.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/aether.cpp.o"
+},
+{
+  "directory": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/build",
+  "command": "/nix/store/79mr0jw3qccq7hhf1hh62knxd88dwazc-gcc-wrapper-15.3.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/frostmourne/Programs/diwakar/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/crypt.cpp.o -c /home/frostmourne/Programs/diwakar/Vulkan_Forge/source/crypt.cpp",
+  "file": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/source/crypt.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/crypt.cpp.o"
+},
+{
+  "directory": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/build",
+  "command": "/nix/store/79mr0jw3qccq7hhf1hh62knxd88dwazc-gcc-wrapper-15.3.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/frostmourne/Programs/diwakar/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/Pipe.cpp.o -c /home/frostmourne/Programs/diwakar/Vulkan_Forge/source/Pipe.cpp",
+  "file": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/source/Pipe.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/Pipe.cpp.o"
+},
+{
+  "directory": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/build",
+  "command": "/nix/store/79mr0jw3qccq7hhf1hh62knxd88dwazc-gcc-wrapper-15.3.0/bin/g++ -DDISPLAY_SERVER=\\\"wayland\\\" -Dcmakemacro=\\\"Unix\\\" -I/home/frostmourne/Programs/diwakar/Vulkan_Forge/include -std=gnu++20 -o CMakeFiles/VulkanTest.dir/source/sanctum.cpp.o -c /home/frostmourne/Programs/diwakar/Vulkan_Forge/source/sanctum.cpp",
+  "file": "/home/frostmourne/Programs/diwakar/Vulkan_Forge/source/sanctum.cpp",
+  "output": "CMakeFiles/VulkanTest.dir/source/sanctum.cpp.o"
 }
 ]
